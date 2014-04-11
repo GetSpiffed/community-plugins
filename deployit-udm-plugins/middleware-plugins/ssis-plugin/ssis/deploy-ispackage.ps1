@@ -30,10 +30,10 @@ try {
 		Write-Host "Package [$PackageFullName] was found on [$ServerInstance]."
 	}
 	else{
-		Write-Host "Package [$PackageFullName] not found on [$ServerInstance]."
+		Write-Error "Package [$PackageFullName] not found on [$ServerInstance]."
 		Exit 1
 	}
 }
 catch {
-    write-error "$_ `n $("Failed to install DtsxFullName {0} to ServerInstance {1} PackageFullName {2}" -f $DtsxFullName,$ServerInstance,$PackageFullName)"
+    Write-Error "$_ `n $("Failed to install DtsxFullName {0} to ServerInstance {1} PackageFullName {2}" -f $DtsxFullName,$ServerInstance,$PackageFullName)"
 }

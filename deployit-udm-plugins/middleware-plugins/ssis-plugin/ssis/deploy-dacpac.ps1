@@ -9,8 +9,11 @@ $fullDacPacPath = $deployed.file
 $SqlServer      = $deployed.serverName
 $TargetDatabase = $deployed.targetDatabase
 
-<#
 $assemblylist = 
+"Microsoft.SqlServer.Smo",
+"Microsoft.SqlServer.SMOEnum",
+"Microsoft.SqlServer.Management.Smo",
+"Microsoft.SqlServer.Management.SMOEnum",
 "Microsoft.SqlServer.Dac",
 "Microsoft.SqlServer.Dac.DacServices",
 "Microsoft.SqlServer.Management.Dac",
@@ -20,13 +23,11 @@ foreach ($asm in $assemblylist)
 {
     $asm = [System.Reflection.Assembly]::LoadWithPartialName($asm)
 }
-#>
 
 add-type -path $deployed.dacDllPath
  
 Write-Host "Deploying the DB with the following settings" 
-Write-Host "SQL Server:   $SqlServer" 
-Write-Host "Dacpac: $fullDacPacPath" 
+Write-Host "SQL Server: $SqlServer" 
 Write-Host "Target Database: $TargetDatabase"
 
 $connectionString = "server=$SqlServer;Trusted_Connection=True;"
@@ -39,6 +40,8 @@ $d = new-object Microsoft.SqlServer.Dac.DacServices ($connectionString)
 
 # register events, if you want 'em 
 register-objectevent -in $d -eventname Message -source "msg" -action { out-host -in $Event.SourceArgs[1].Message.Message } | Out-Null
+
+$ErrorActionPreference = "Continue" #To force script to run to completion
 
 # Load dacpac from file & deploy to database named pubsnew
 $dp = [Microsoft.SqlServer.Dac.DacPackage]::Load($fullDacPacPath)
@@ -53,3 +56,13 @@ $d.Deploy($dp, $TargetDatabase, $true, $DeployOptions)
 
 # clean up event 
 unregister-event -source "msg" 
+
+$srv = new-Object Microsoft.SqlServer.Management.Smo.Server($SqlServer)
+if ($srv.Databases[$TargetDatabase] -ne $null){
+    Write-Host "Database $targetDatabase successfully created."
+    Exit 0
+}
+else{
+    Write-Error "Database $targetDatabase was not created."
+    Exit 1
+}
