@@ -11,6 +11,7 @@ See the **XL Deploy Reference Manual** for background information on XL Deploy a
 
 * Deploys SSIS (dts) packages to an [MSSQLClient container](http://docs.xebialabs.com/releases/latest/deployit/databasePluginManual.html#sqlmssqlclient "Database plugin documentation")
 * Deploys SSIS (ispac) projects to an [MSSQLClient container](http://docs.xebialabs.com/releases/latest/deployit/databasePluginManual.html#sqlmssqlclient "Database plugin documentation")
+* Deploys database packages (dacpac) to an [MSSQLClient container](http://docs.xebialabs.com/releases/latest/deployit/databasePluginManual.html#sqlmssqlclient "Database plugin documentation")
 * Compatible with SQL Server 2005 and up (SQL Server 2012 required for project deployments)
 
 # Requirements #
@@ -42,3 +43,7 @@ Within the folder:
 	*The environment is referenced to the project
 
 When the ISProject is destroyed the catalog is removed if it is not shared. Otherwise only project & environments are removed. If the folderName is empty after project & environment removal it is also removed.
+
+An database package is bundled in a single dacpac file. 
+
+The plugin copies the provided dacpac file (the artefact) to the container's server. Where it is deployed using powershell. Requires powershell v3, which is checked by the script.
