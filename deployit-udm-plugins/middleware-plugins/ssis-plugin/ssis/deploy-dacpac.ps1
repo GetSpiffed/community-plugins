@@ -49,7 +49,7 @@ $DeployOptions.IgnoreFilegroupPlacement  = $deployed.ignoreFilegroupPlacement
 $DeployOptions.IgnoreFileAndLogFilePath  = $deployed.ignoreFileAndLogFilePath
 $DeployOptions.AllowIncompatiblePlatform = $deployed.allowIncompatiblePlatform
 
-$d.Deploy($dp, $TargetDatabase,$true,$DeployOptions) 
+$d.Deploy($dp, $TargetDatabase, $true, $DeployOptions) 
 
 # clean up event 
 unregister-event -source "msg" 
