@@ -17,15 +17,42 @@
         <property name="serverInstance" required="true"/>
         <property name="packageFullName" required="true"/>
     </type>
+
+    <type container-type="sql.MsSqlClient" deployable-type="mssql.Dacpac" description="SQL Server dacpac" extends="powershell.ExtensiblePowerShellDeployedArtifact" type="mssql.DeployedDacpac">
+        <generate-deployable description="Dacpac file" extends="powershell.BasePowerShellDeployableFileArtifact" type="mssql.Dacpac"/>
+        <!-- hidden -->
+        <property default="ssis/deploy-dacpac.ps1" hidden="true" name="createScript"/>
+        <property default="54" hidden="true" kind="integer" name="createOrder"/>
+        <property default="Deploy" hidden="true" name="createVerb"/>
+        <property default="iis/deploy-dacpac.ps1" hidden="true" name="modifyScript"/>
+        <property default="54" hidden="true" kind="integer" name="modifyOrder"/>
+        <property default="Deploy" hidden="true" name="modifyVerb"/>
+        <property default="ssis/destroy-dacpac.ps1" hidden="true" name="destroyScript"/>
+        <property default="46" hidden="true" kind="integer" name="destroyOrder"/>
+        <property default="Drop" hidden="true" name="destroyVerb"/>
+        <!-- public -->
+        <property name="serverName" required="true"/>
+        <property name="targetDatabase" required="true"/>
+        <property name="userName" required="false"/>
+        <property name="password" password="true" required="false"/>
+        <property name="includeCompositeObjects" kind="boolean" required="false" default="true"/>
+        <property name="ignoreFileSize" kind="boolean" required="false" default="false"/>
+        <property name="includeCompositeObjects" kind="boolean" required="false" default="true"/>
+        <property name="ignoreFilegroupPlacement" kind="boolean" required="false" default="false"/>
+        <property name="ignoreFileAndLogFilePath" kind="boolean" required="false" default="false"/>
+        <property name="allowIncompatiblePlatform" kind="boolean" required="false" default="true"/>
+        <property name="dacDllPath" required="false" default="C:\Program Files (x86)\Microsoft SQL Server\110\DAC\bin\Microsoft.SqlServer.Dac.dll"/>
+    </type>
+
     <type container-type="sql.MsSqlClient" deployable-type="mssql.ISProject" description="Published SSIS project" extends="powershell.ExtensiblePowerShellDeployedArtifact" type="mssql.DeployedISProject">
         <generate-deployable description="ISPAC file containing the MS SSIS project" extends="powershell.BasePowerShellDeployableFileArtifact" type="mssql.ISProject"/>
         <!-- hidden -->
         <property default="ssis/deploy-isproject.ps1" hidden="true" name="createScript"/>
         <property default="54" hidden="true" kind="integer" name="createOrder"/>
-        <property default="Copy" hidden="true" name="createVerb"/>
+        <property default="Deploy" hidden="true" name="createVerb"/>
         <property default="iis/deploy-isproject.ps1" hidden="true" name="modifyScript"/>
         <property default="54" hidden="true" kind="integer" name="modifyOrder"/>
-        <property default="Copy" hidden="true" name="modifyVerb"/>
+        <property default="Deploy" hidden="true" name="modifyVerb"/>
         <property default="ssis/destroy-isproject.ps1" hidden="true" name="destroyScript"/>
         <property default="46" hidden="true" kind="integer" name="destroyOrder"/>
         <property default="Delete" hidden="true" name="destroyVerb"/>
@@ -43,7 +70,6 @@
         <property as-containment="true" description="Environments for this project" kind="set_of_ci" name="environments" referenced-type="mssql.Environment"/>
         <property as-containment="true" description="Jobs for this project" kind="set_of_ci" name="jobs" referenced-type="mssql.Job"/>
     </type-modification>
-
     <type container-type="mssql.DeployedISProject" deployable-type="mssql.Environment" description="SSIS Project environment" extends="udm.BaseEmbeddedDeployed" type="mssql.DeployedEnvironment">
         <generate-deployable description="Specification of an SSIS environment" extends="udm.BaseEmbeddedDeployable" type="mssql.Environment"/>
         <property name="environmentName" required="true"/>
@@ -62,7 +88,6 @@
         <property default="" name="description" required="false"/>
         <property default="true" kind="boolean" name="includeProjectParameterReference" required="true"/>
     </type>
-
     <type container-type="mssql.DeployedISProject" deployable-type="mssql.Job" description="SSIS Project job" extends="udm.BaseEmbeddedDeployed" type="mssql.DeployedJob">
         <generate-deployable description="Specification of an SSIS job" extends="udm.BaseEmbeddedDeployable" type="mssql.Job"/>
         <property name="jobName" required="true"/>
