@@ -29,10 +29,10 @@ Write-Host "SQL Server:   $SqlServer"
 Write-Host "Dacpac: $fullDacPacPath" 
 Write-Host "Target Database: $TargetDatabase"
 
-$connectionString = "server=$SqlServer"
+$connectionString = "server=$SqlServer;Trusted_Connection=True;"
 if($deployed.userName -and $deployed.password){
     Write-Host "Using provided credentials for user $($deployed.userName)."
-    $connectionString = "server=$SqlServer;User ID=$($deployed.userName);Password=$($deployed.password)"
+    $connectionString = "server=$SqlServer;User Id=$($deployed.userName);Password=$($deployed.password)"
 }
 
 $d = new-object Microsoft.SqlServer.Dac.DacServices ($connectionString)

@@ -46,4 +46,4 @@ When the ISProject is destroyed the catalog is removed if it is not shared. Othe
 
 An database package is bundled in a single dacpac file. 
 
-The plugin copies the provided dacpac file (the artefact) to the container's server. Where it is deployed using powershell. Requires powershell v3, which is checked by the script.
+The plugin copies the provided dacpac file (the artefact) to the container's server. Where it is deployed using powershell. Requires powershell v3, which is checked by the script. It also requires a trusted connection, so native winrm (available when XL Deploys runs on windows machine) or a winrs proxy with credential delegation is needed.
