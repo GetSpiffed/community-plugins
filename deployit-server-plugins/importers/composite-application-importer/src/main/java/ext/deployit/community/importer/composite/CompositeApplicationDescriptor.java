@@ -92,16 +92,12 @@ public class CompositeApplicationDescriptor {
 
 	private Map<String, String> loadCompositeApplicationDescriptor(File source) {
 		Properties properties = new Properties();
-		FileInputStream fileInputStream = null;
-		try {
-			fileInputStream = new FileInputStream(source);
+		try (FileInputStream fileInputStream = new FileInputStream(source) ) {
 			properties.load(fileInputStream);
 		} catch (FileNotFoundException e) {
 			throw new RuntimeException("File not found " + source, e);
 		} catch (IOException e) {
 			throw new RuntimeException("Cannot load " + source, e);
-		} finally {
-			Closeables.closeQuietly(fileInputStream);
 		}
 		return Maps.fromProperties(properties);
 	}

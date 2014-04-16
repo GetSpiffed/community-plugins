@@ -1,11 +1,9 @@
 package com.xebialabs.deployit.plugins.tests.step;
 
 import java.util.Map;
-
 import org.slf4j.MDC;
 
 import com.xebialabs.deployit.plugin.api.flow.StepExitCode;
-import com.xebialabs.deployit.plugin.generic.freemarker.FileUploader;
 import com.xebialabs.deployit.plugin.generic.step.ScriptExecutionStep;
 import com.xebialabs.deployit.plugin.overthere.DefaultProcessOutputHandler;
 import com.xebialabs.deployit.plugin.overthere.HostContainer;
@@ -14,8 +12,6 @@ import com.xebialabs.overthere.OperatingSystemFamily;
 import com.xebialabs.overthere.OverthereFile;
 import com.xebialabs.overthere.OverthereProcessOutputHandler;
 import com.xebialabs.overthere.util.OverthereUtils;
-
-import static com.google.common.collect.Maps.newHashMap;
 
 @SuppressWarnings("serial")
 public class RemoteHttpTesterStep extends ScriptExecutionStep {
@@ -120,18 +116,5 @@ public class RemoteHttpTesterStep extends ScriptExecutionStep {
 		return osSpecificScript;
 	}
 
-	private class WorkingFolderUploader implements FileUploader {
-		private Map<String, String> uploadedFiles = newHashMap();
 
-		@Override
-		public String upload(OverthereFile file) {
-			if (uploadedFiles.containsKey(file.getName())) {
-				return uploadedFiles.get(file.getName());
-			}
-			OverthereFile uploadedFile = getRemoteWorkingDirectory().getFile(file.getName());
-			file.copyTo(uploadedFile);
-			uploadedFiles.put(file.getName(), uploadedFile.getPath());
-			return uploadedFile.getPath();
-		}
-	}
 }

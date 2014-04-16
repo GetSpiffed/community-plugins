@@ -3,22 +3,22 @@
   <modelVersion>4.0.0</modelVersion>
   <groupId>org.xebialabs.deployit</groupId>
   <artifactId>community-plugins-project</artifactId>
-  <version>3.9</version>
+  <version>4.0</version>
   <packaging>pom</packaging>
   <properties>
     <deployit.server.home>${env.DEPLOYIT_HOME}</deployit.server.home>
     <deployit.cli.home>${env.DEPLOYIT_CLI_HOME}</deployit.cli.home>
-    <deployit.api.version>3.9.4</deployit.api.version>
-    <deployit.spi.version>3.9.4</deployit.spi.version>
-    <deployit.engine.version>3.9.4</deployit.engine.version>
-    <deployit.servercli.version>3.9.4</deployit.servercli.version>
-    <deployit.bundledplugin.version>3.9.4</deployit.bundledplugin.version>
-    <deployit.wls.version>3.9.2</deployit.wls.version>
-    <overthere.version>2.3.1</overthere.version>
-    <scannit.version>1.0.2</scannit.version>
+    <deployit.api.version>4.0.0</deployit.api.version>
+    <deployit.spi.version>4.0.0</deployit.spi.version>
+    <deployit.engine.version>4.0.0</deployit.engine.version>
+    <deployit.servercli.version>4.0.0</deployit.servercli.version>
+    <deployit.bundledplugin.version>4.0.0</deployit.bundledplugin.version>
+    <deployit.wls.version>3.9.1</deployit.wls.version>
+    <overthere.version>2.4.2</overthere.version>
+    <scannit.version>1.2.1</scannit.version>
     <github.global.server>github</github.global.server>
-    <maven.compile.source>1.6</maven.compile.source>
-    <maven.compile.target>1.6</maven.compile.target>
+    <maven.compile.source>1.7</maven.compile.source>
+    <maven.compile.target>1.7</maven.compile.target>
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
   </properties>
   <scm>
@@ -67,6 +67,14 @@
         <scope>system</scope>
         <systemPath>${deployit.cli.home}/lib/remote-booter-${deployit.engine.version}.jar</systemPath>
       </dependency>
+      <dependency>
+        <groupId>com.xebialabs.deployit.engine</groupId>
+        <artifactId>planner</artifactId>
+        <version>${deployit.engine.version}</version>
+        <scope>system</scope>
+        <systemPath>${deployit.server.home}/lib/planner-${deployit.engine.version}.jar</systemPath>
+      </dependency>
+
       <dependency>
         <groupId>com.xebialabs.deployit</groupId>
         <artifactId>server-core</artifactId>
@@ -167,7 +175,7 @@
       <dependency>
         <groupId>com.google.guava</groupId>
         <artifactId>guava</artifactId>
-        <version>13.0</version>
+        <version>16.0.1</version>
       </dependency>
       <dependency>
         <groupId>com.google.code.findbugs</groupId>
@@ -177,7 +185,7 @@
       <dependency>
         <groupId>org.slf4j</groupId>
         <artifactId>slf4j-api</artifactId>
-        <version>1.6.3</version>
+        <version>1.7.5</version>
       </dependency>
       <dependency>
         <groupId>commons-httpclient</groupId>

@@ -8,14 +8,13 @@ import com.ibm.as400.access.AS400Message;
 import com.ibm.as400.access.CommandCall;
 
 import com.xebialabs.deployit.plugin.api.flow.*;
+import com.xebialabs.deployit.plugin.api.udm.artifact.Artifact;
+import com.xebialabs.deployit.plugin.generic.freemarker.ArtifactUploader;
 import com.xebialabs.deployit.plugin.generic.freemarker.CiAwareObjectWrapper;
 import com.xebialabs.deployit.plugin.generic.freemarker.ConfigurationHolder;
-import com.xebialabs.deployit.plugin.generic.freemarker.FileUploader;
-import com.xebialabs.overthere.OverthereFile;
 import com.xebialabs.overthere.RuntimeIOException;
 
 import ext.deployit.community.plugin.iseries.ci.Server;
-import freemarker.ext.beans.BeansWrapper;
 import freemarker.template.Configuration;
 import freemarker.template.Template;
 import freemarker.template.TemplateException;
@@ -109,10 +108,11 @@ public class ISeriesScriptExecutionStep implements Step, PreviewStep {
             varsWithStatics.put("step", this);
             //The step never uploads content on the remote machine.
             template.createProcessingEnvironment(varsWithStatics, sw, new CiAwareObjectWrapper(
-                    new FileUploader() {
+                    new ArtifactUploader() {
+
                         @Override
-                        public String upload(final OverthereFile file) {
-                            return "NOT-UPLOADED----" + file.getName();
+                        public String upload(final Artifact artifact) {
+                            return "NOT-UPLOADED----" + artifact.getName();
                         }
                     }, maskPasswords)
             ).process();

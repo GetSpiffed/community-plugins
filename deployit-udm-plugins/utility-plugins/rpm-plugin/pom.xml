@@ -5,7 +5,7 @@
   <parent>
     <groupId>org.xebialabs.deployit</groupId>
     <artifactId>utility-plugins</artifactId>
-    <version>3.9</version>
+    <version>4.0</version>
     <relativePath>../pom.xml</relativePath>
   </parent>
   <artifactId>rpm-plugin</artifactId>
@@ -21,6 +21,22 @@
     <dependency>
       <groupId>com.xebialabs.deployit.plugins</groupId>
       <artifactId>generic-plugin</artifactId>
+    </dependency>
+    <dependency>
+      <groupId>com.xebialabs.deployit.plugins</groupId>
+      <artifactId>remoting-plugin</artifactId>
+    </dependency>
+    <dependency>
+      <groupId>com.xebialabs.deployit.engine</groupId>
+      <artifactId>planner</artifactId>
+    </dependency>
+    <dependency>
+      <groupId>com.xebialabs.deployit.engine</groupId>
+      <artifactId>local-booter</artifactId>
+    </dependency>
+    <dependency>
+      <groupId>com.xebialabs.overthere</groupId>
+      <artifactId>overthere</artifactId>
     </dependency>
   </dependencies>
 

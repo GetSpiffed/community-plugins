@@ -36,9 +36,7 @@ public class FetchProcessedArtifactStep implements Step {
 
     @Override
     public StepExitCode execute(final ExecutionContext executionContext) throws Exception {
-        OverthereConnection connection = null;
-        try {
-            connection = host.getConnection();
+        try (OverthereConnection connection = host.getConnection() ) {
             final OverthereFile remoteFile = connection.getFile(remoteLocation);
             if (!remoteFile.exists()) {
                 executionContext.logError(format("The remote file does not exist %s", remoteFile));
@@ -54,8 +52,6 @@ public class FetchProcessedArtifactStep implements Step {
             }
 
             return StepExitCode.SUCCESS;
-        } finally {
-            Closeables.closeQuietly(connection);
         }
     }
 
