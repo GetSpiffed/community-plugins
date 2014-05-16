@@ -1,34 +1,53 @@
 <?xml version="1.0" encoding="utf-8"?>
 <synthetic xmlns="http://www.xebialabs.com/deployit/synthetic" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.xebialabs.com/deployit/synthetic synthetic.xsd">
+    <type-modification type="overthere.CifsHost">
+        <method name="checkPSv3" label="Check for Powershell v3" delegate="shellScript" script="ps/checkPSVersion3.bat" classpathResources="ps/checkPSVersion3.ps1"/>
+    </type-modification>
     <type container-type="sql.MsSqlClient" deployable-type="mssql.ISPackage" description="Published SSIS dtsx package" extends="powershell.ExtensiblePowerShellDeployedArtifact" type="mssql.DeployedISPackage">
         <generate-deployable description="Dtsx file containing the MS SSIS package" extends="powershell.BasePowerShellDeployableFileArtifact" type="mssql.ISPackage"/>
         <!-- hidden -->
         <property default="ssis/runtime/ssis-setup.ps1" hidden="true" kind="list_of_string" name="libraryScripts"/>
         <property default="ssis/deploy-ispackage.ps1" hidden="true" name="createScript"/>
         <property default="54" hidden="true" kind="integer" name="createOrder"/>
-        <property default="Copy" hidden="true" name="createVerb"/>
+        <property default="Install" hidden="true" name="createVerb"/>
         <property default="iis/deploy-ispackage.ps1" hidden="true" name="modifyScript"/>
         <property default="54" hidden="true" kind="integer" name="modifyOrder"/>
-        <property default="Copy" hidden="true" name="modifyVerb"/>
+        <property default="Install" hidden="true" name="modifyVerb"/>
         <property default="ssis/destroy-ispackage.ps1" hidden="true" name="destroyScript"/>
         <property default="46" hidden="true" kind="integer" name="destroyOrder"/>
         <property default="Delete" hidden="true" name="destroyVerb"/>
         <!-- public -->
         <property name="serverInstance" required="true"/>
         <property name="packageFullName" required="true"/>
+        <property name="executePackage" kind="boolean" default="false" required="true" hidden="true"/>
+        <property name="sqlServerVersion" kind="string" required="false" label="SQL Server version (short)" description="Short SQL Server version indicator ie. 110, 100, 90"/>
+        <property as-containment="true" description="Variables for this package" kind="set_of_ci" name="packageVariables" referenced-type="mssql.DeployedPackageVariable"/>
+    </type>
+    <type-modification type="mssql.ISPackage">
+        <property as-containment="true" description="Variables for this package" kind="set_of_ci" name="packageVariables" referenced-type="mssql.PackageVariable"/>
+    </type-modification>
+    <type container-type="mssql.DeployedISPackage" deployable-type="mssql.PackageVariable" description="SSIS package variable" extends="udm.BaseEmbeddedDeployed" type="mssql.DeployedPackageVariable">
+        <generate-deployable description="SSIS package variable" extends="udm.BaseEmbeddedDeployable" type="mssql.PackageVariable"/>
+        <property name="propertyNamespace" default="User" required="true">
+            <rule type="regex" pattern="(^[Uu]ser$)|(^[Ss]ystem$)"
+               message="Property namespace, should be either User or System, defaults to User."/>
+        </property>        
+        <property name="propertyName" required="true"/>
+        <property name="propertyValue" required="true"/>
+        <property name="propertyIsReadOnly" kind="boolean" default="true" required="true"/>
     </type>
 
     <type container-type="sql.MsSqlClient" deployable-type="mssql.Dacpac" description="SQL Server dacpac" extends="powershell.ExtensiblePowerShellDeployedArtifact" type="mssql.DeployedDacpac">
         <generate-deployable description="Dacpac file" extends="powershell.BasePowerShellDeployableFileArtifact" type="mssql.Dacpac"/>
         <!-- hidden -->
         <property default="ssis/deploy-dacpac.ps1" hidden="true" name="createScript"/>
-        <property default="54" hidden="true" kind="integer" name="createOrder"/>
+        <property default="53" hidden="true" kind="integer" name="createOrder"/>
         <property default="Deploy" hidden="true" name="createVerb"/>
-        <property default="iis/deploy-dacpac.ps1" hidden="true" name="modifyScript"/>
-        <property default="54" hidden="true" kind="integer" name="modifyOrder"/>
+        <property default="ssis/deploy-dacpac.ps1" hidden="true" name="modifyScript"/>
+        <property default="53" hidden="true" kind="integer" name="modifyOrder"/>
         <property default="Deploy" hidden="true" name="modifyVerb"/>
         <property default="ssis/destroy-dacpac.ps1" hidden="true" name="destroyScript"/>
-        <property default="46" hidden="true" kind="integer" name="destroyOrder"/>
+        <property default="47" hidden="true" kind="integer" name="destroyOrder"/>
         <property default="Drop" hidden="true" name="destroyVerb"/>
         <!-- public -->
         <property name="serverName" required="true"/>
@@ -134,5 +153,36 @@
             <rule type="regex" pattern="^((0[1-9]|[12][0-9]|3[01])[/](0[1-9]|1[012])[/]\d{4}) ([0-1][0-9]|2[0-4]):([0-5][0-9]):([0-5][0-9])$"
                message="Invalid date time format, input should adhere to 'dd/mm/yyyy hh:mm:ss'."/>
         </property>
+    </type>
+
+    <type container-type="sql.MsSqlClient" deployable-type="mssql.SQLPackage" description="Published SSIS project" extends="powershell.ExtensiblePowerShellDeployedArtifact" type="mssql.DeployedSQLPackage">
+        <generate-deployable description="ISPAC file containing the MS SSIS project" extends="powershell.BasePowerShellDeployableFileArtifact" type="mssql.SQLPackage"/>
+        <!-- hidden -->
+        <property default="ssis/deploy-sqlpackage.ps1" hidden="true" name="createScript"/>
+        <property default="54" hidden="true" kind="integer" name="createOrder"/>
+        <property default="Deploy" hidden="true" name="createVerb"/>
+        <property default="iis/deploy-sqlpackage.ps1" hidden="true" name="modifyScript"/>
+        <property default="54" hidden="true" kind="integer" name="modifyOrder"/>
+        <property default="Deploy" hidden="true" name="modifyVerb"/>
+        <property default="ssis/destroy-sqlpackage.ps1" hidden="true" name="destroyScript"/>
+        <property default="46" hidden="true" kind="integer" name="destroyOrder"/>
+        <property default="Delete" hidden="true" name="destroyVerb"/>
+        <!-- public -->
+        <property name="projectName" required="true"/>
+        <property name="folderName" required="true"/>
+        <property default="localhost" name="serverName" required="true"/>
+        <property default="true" kind="boolean" name="catalogShared" required="true"/>
+        <property default="SSISDB" name="catalogName" required="false"/>
+        <property name="catalogPassword" password="true" required="false"/>
+        <property as-containment="true" description="Variables for this package" kind="set_of_ci" name="Variables" referenced-type="mssql.DeployedSqlCmdVariable"/>
+    </type>
+    <type-modification type="mssql.SQLPackage">
+        <property as-containment="true" description="Variables for this package" kind="set_of_ci" name="environments" referenced-type="mssql.SqlCmdVariable"/>
+    </type-modification>
+    <type container-type="mssql.DeployedSQLPackage" deployable-type="mssql.SqlCmdVariable" description="SqlCmd variables for publish definition" extends="udm.BaseEmbeddedDeployed" type="mssql.SqlCmdVariable">
+        <generate-deployable description="Definition of sqlcmd variable" extends="udm.BaseEmbeddedDeployable" type="mssql.Environment"/>
+        <property name="environmentName" required="true"/>
+        <property name="environmentDescription" required="false"/>
+        <property as-containment="true" description="Variables for this environment" kind="set_of_ci" name="variables" referenced-type="mssql.DeployedEnvironmentVariable"/>
     </type>
 </synthetic>
