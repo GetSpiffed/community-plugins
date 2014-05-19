@@ -1,0 +1,1 @@
+powershell -File "checkPSVersion3.ps1"

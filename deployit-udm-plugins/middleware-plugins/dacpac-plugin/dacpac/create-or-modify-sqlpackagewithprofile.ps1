@@ -1,0 +1,2 @@
+Write-Host "& $($deployed.sqlPackagePath) /Profile:'$($deployed.file)/$($deployed.deploymentProfileFileName)' /SourceFile:'$($deployed.file)/$($deployed.dacpacFileName)' /Action:Publish"
+& $($deployed.sqlPackagePath) /Profile:"$($deployed.file)/$($deployed.deploymentProfileFileName)" /SourceFile:"$($deployed.file)/$($deployed.dacpacFileName)" /Action:Publish
