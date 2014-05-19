@@ -4,34 +4,60 @@ $PackageFullName = $deployed.packageFullName
 
 try {
 	# Get Sql Version
-	$SqlVersion = Get-SqlVersion -ServerInstance $ServerInstance
+	$SqlVersion = ""
+	if($deployed.sqlServerVersion){
+		$SqlVersion = $deployed.sqlServerVersion
+	}
+	else{
+		if($deployed.container.type -eq 'overthere.LocalHost'){
+			$SqlVersion = Get-SqlVersion -ServerInstance '(local)'
+		}
+		else{
+			$SqlVersion = Get-SqlVersion -ServerInstance $ServerInstance		
+		}
+	}
+
+	Write-Host "SqlVersion established to be [$SqlVersion]."
 
 	# Set Dtutil Path based on Sql Version
-	Set-DtutilPath -SqlVersion $SqlVersion
-	
+	Set-DtsPaths -SqlVersion $SqlVersion
+
 	##Check for existing package
-	if (test-packagepath $PackageFullName) {
+	if (Test-Packagepath $PackageFullName) {
 		Write-Host "Removing old package [$PackageFullName] from [$ServerInstance]."
-		remove-package -ServerInstance $ServerInstance -PackageFullName $PackageFullName
+		Remove-Package -ServerInstance $ServerInstance -PackageFullName $PackageFullName
 	}
 
 	Write-Host "Deploying package [$PackageFullName] to [$ServerInstance]."
 
 	#Create path if needed
 	Get-FolderList -PackageFullName $PackageFullName |
-	where { $(test-path -ServerInstance $ServerInstance -FolderPath $_.FullPath) -eq $false } |
-	foreach { new-folder -ServerInstance $ServerInstance -ParentFolderPath $_.Parent -NewFolderName $_.Child }
+	where { $(Test-Path -ServerInstance $ServerInstance -FolderPath $_.FullPath) -eq $false } |
+	foreach { New-Folder -ServerInstance $ServerInstance -ParentFolderPath $_.Parent -NewFolderName $_.Child }
 
 	#Install SSIS Package
-	install-package -DtsxFullName $DtsxFullName -ServerInstance $ServerInstance -PackageFullName $PackageFullName
+	Install-Package -DtsxFullName $DtsxFullName -ServerInstance $ServerInstance -PackageFullName $PackageFullName
 
 	#Verify Package
-	if(test-packagepath -ServerInstance $ServerInstance -PackageFullName $PackageFullName){
+	if(Test-Packagepath -ServerInstance $ServerInstance -PackageFullName $PackageFullName){
 		Write-Host "Package [$PackageFullName] was found on [$ServerInstance]."
 	}
 	else{
 		Write-Error "Package [$PackageFullName] not found on [$ServerInstance]."
 		Exit 1
+	}
+
+	if($deployed.executePackage){
+		Write-Host "Executing package [$PackageFullName] on [$ServerInstance]."
+		$Params = "/U sa /P Dutch007 ";
+		foreach($packageVariable in $deployed.packageVariables) {
+	        $NameSpace = $packageVariable.propertyNamespace;
+	        $PropertyName = $packageVariable.propertyName;
+	        $Value = $packageVariable.propertyValue;
+	        $PropertyPathValue =  Get-DtExecPropertyPathValue -NameSpace $NameSpace -PropertyName $PropertyName -Value $Value;
+	        $Params += "/SET $PropertyPathValue ";
+	    } 
+		Execute-Package -PackageFullName $PackageFullName -ServerInstance $ServerInstance -Parameters $Params
 	}
 }
 catch {

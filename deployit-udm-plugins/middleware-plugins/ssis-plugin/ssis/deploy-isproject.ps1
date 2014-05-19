@@ -77,7 +77,7 @@ foreach ($environment in $deployed.environments) {
 	}
 
 	Write-Host "Creating environment [$EnvironmentName]"
-	$projectEnvironment = New-Object $ISNamespace".EnvironmentInfo" ($folder, "$($EnvironmentName)", "$($environment.environmentDescription)")
+	$projectEnvironment = New-Object $ISNamespace".EnvironmentInfo" ($folder, "$EnvironmentName", "$($environment.environmentDescription)")
 	$projectEnvironment.Create()
 
 	foreach ($envvar in $environment.variables) {
@@ -172,3 +172,4 @@ if($deployed.jobs.Count -gt 0){
 }
 
 Write-Host "Project deployment completed successfully."
+Exit 0

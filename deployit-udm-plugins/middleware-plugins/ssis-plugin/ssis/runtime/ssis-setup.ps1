@@ -2,12 +2,16 @@
 
 $ErrorActionPreference = "Stop"
 $Script:dtutil = $null
+$Script:dtexec = $null
 $exitCode = @{
-0="The utility executed successfully."
-1="The utility failed."
-4="The utility cannot locate the requested package."
-5="The utility cannot load the requested package."
-6="The utility cannot resolve the command line because it contains either syntactic or semantic errors"}
+    0="The utility executed successfully."
+    1="The utility failed."
+    4="The utility cannot locate the requested package."
+    5="The utility cannot load the requested package."
+    6="The utility cannot resolve the command line because it contains either syntactic or semantic errors"
+}
+
+[reflection.assembly]::LoadWithPartialName("Microsoft.SqlServer.ManagedDTS") > $null
 
 #######################
 function Get-SqlVersion
@@ -17,75 +21,113 @@ function Get-SqlVersion
     Write-Host "Getting SQL Server version for [$ServerInstance]."
     
     #write-verbose "sqlcmd -S `"$ServerInstance`" -d `"master`" -Q `"SET NOCOUNT ON; SELECT SERVERPROPERTY('ProductVersion')`" -h -1 -W"
-    
-    $SqlVersion = sqlcmd -S "$ServerInstance" -d "master" -Q "SET NOCOUNT ON; SELECT SERVERPROPERTY('ProductVersion')" -h -1 -W
 
+    $SqlVersion = sqlcmd -S "$ServerInstance" -d "master" -Q "SET NOCOUNT ON; SELECT SERVERPROPERTY('ProductVersion')" -h -1 -W
+<#
     if ($lastexitcode -ne 0) {
         Write-Host "SqlVersion could not be established [$SqlVersion]."
         Exit 1
     }
     else {
+        Write-Host "SqlVersion established to be [$SqlVersion]."
         $SqlVersion
     }
-    
+#>  
+    return $SqlVersion  
 } #Get-SqlVersion
 
-#######################
-function Set-DtutilPath
-{
+function Set-DtsPaths {
     param($SqlVersion)
-
-    $paths = [Environment]::GetEnvironmentVariable("Path", "Machine") -split ";"
-
-    if ($SqlVersion -like "9*") {
-        $Script:dtutil = $paths | where { $_ -like "*Program Files\Microsoft SQL Server\90\DTS\Binn\" }
-        if ($Script:dtutil -eq $null) {
-			Write-Host "SQL Server 2005 Version of dtutil not found."
-			Exit 1
-        }
-    }
-    elseif ($SqlVersion -like "10*") {
-        $Script:dtutil = $paths | where { $_ -like "*Program Files\Microsoft SQL Server\100\DTS\Binn\" }
-        if ($Script:dtutil -eq $null) {
-			Write-Host "SQL Server 2008 or 2008R2 Version of dtutil not found."
-			Exit 1
-        }
-    }
-    elseif ($SqlVersion -like "11*") {
-        $Script:dtutil = $paths | where { $_ -like "*Program Files\Microsoft SQL Server\110\DTS\Binn\" }
-        if ($Script:dtutil -eq $null) {
-			Write-Host "SQL Server 2012 Version of dtutil not found."
-			Exit 1
-        }
-    }
-
-    if ($Script:dtutil -eq $null) {
-		Write-Host "Unable to find path to dtutil.exe. Verify dtutil installed."
-		Exit 1
-    }
-    else {
-        $Script:dtutil += 'dtutil.exe'
-    }
     
-} #Set-DtutilPath
+    $Script:dtexec = 'DTExec';
+    $Script:dtutil += 'dtutil';
+
+    $dtutilPath = $false;
+    $dtExecPath = $false;
+
+    if(Get-Command $Script:dtutil  -errorAction SilentlyContinue){ $dtutilPath=$true }
+    if(Get-Command $Script:dtexec  -errorAction SilentlyContinue){ $dtexecPath=$true }
+
+    if(-not $dtexecPath -or -not $dtutilPath){
+        $SqlShort=""
+        if($SqlVersion.indexOf(".") -eq -1){
+            $SqlShort=$SqlVersion
+        }
+        else{
+            $SqlShort = $SqlVersion.subString(0, $SqlVersion.indexOf(".")) +'0';
+        }
+
+        $paths = [Environment]::GetEnvironmentVariable("Path", "Machine") -split ";"
+
+        $dtsPath = $paths | where { 
+            $_ -like "*Microsoft SQL Server\$SqlShort\DTS\Binn\" 
+        }
+
+        if ($dtsPath -eq $null) {
+            Write-Host "DTS path for SQL Server Version [$SqlVersion] not found."
+            Exit 1
+        }
+        else {
+            if(-not $dtexecPath){
+                $Script:dtexec = $dtsPath + 'DTExec.exe'
+            }
+            if(-not $dtutilPath){
+                $Script:dtutil = $dtsPath + 'dtutil.exe'
+            }
+        }
+    }
+}
   
 #######################
-function install-package
+function Install-Package
 {
     param($DtsxFullName, $ServerInstance, $PackageFullName)
-    
+
     $result = & $Script:dtutil /File "$DtsxFullName" /DestServer "$ServerInstance" /Copy SQL`;"$PackageFullName" /Quiet
     $result = $result -join "`n"
 
     if ($lastexitcode -ne 0) {
-        Write-Host "Cannot install package at [$PackageFullName]."
+        Write-Host "Cannot install package at [$PackageFullName]. $result"
         Exit 1
     }
+} #install-package
+
+#######################
+function Get-DtExecPropertyPathValue() {
+    param(
+        $NameSpace = 'User',
+        $PropertyName = '',
+        $Value = ''
+    );
+    "\Package.Variables[$NameSpace::$PropertyName].Properties[Value];$Value"
+}
+
+function Execute-Package
+{
+    param($PackageFullName, $ServerInstance, $Parameters)
+
+    $result = & $Script:dtexec /Rep V /Server "$ServerInstance" /SQL "$PackageFullName" $Parameters
+    $result = $result -join "`n"
+
+    if ($lastexitcode -ne 0) {
+        Write-Host $result
+        Write-Host "Failed to execute package at [$PackageFullName]. Last exit code: [$lastexitcode]."
+        Exit 1
+    }
+
+    <#
+    $result = $result -join "`n"
+
+    if ($lastexitcode -ne 0) {
+        Write-Host "Cannot execute package on [$ServerInstance]."
+        Exit 1
+    }
+    #>
 
 } #install-package
 
 #######################
-function remove-package
+function Remove-Package
 {
     param($ServerInstance, $PackageFullName)
     
@@ -99,31 +141,9 @@ function remove-package
 
 } #remove-package
 
-#######################
-function test-path
-{
-    param($ServerInstance, $FolderPath)
-
-    #write-verbose "$Script:dtutil /SourceServer `"$ServerInstance`" /FExists SQL`;`"$FolderPath`""
-
-    $result = & $Script:dtutil /SourceServer "$ServerInstance" /FExists SQL`;"$FolderPath"
-
-    if ($lastexitcode -gt 1) {
-        $result = $result -join "`n"
-        throw "$result `n $($exitcode[$lastexitcode])"
-    }
-
-    if ($result -and $result[4] -eq "The specified folder exists.") {
-        $true
-    }
-    else {
-        $false
-    }
-
-} #test-path
 
 #######################
-function test-packagepath
+function Test-Packagepath
 {
     param($ServerInstance, $PackageFullName)
 
@@ -141,7 +161,67 @@ function test-packagepath
 } #test-packagepath
 
 #######################
-function new-folder
+function New-ISApplication
+{
+   new-object ("Microsoft.SqlServer.Dts.Runtime.Application") 
+
+} #New-ISApplication
+
+#######################
+function Test-ISPath
+{
+    param([string]$path=$(throw 'path is required.'), [string]$serverName=$(throw 'serverName is required.'), [string]$pathType='Any')
+
+    #If serverName contains instance i.e. server\instance, convert to just servername:
+    $serverName = $serverName -replace "\\.*"
+
+    #Note: Don't specify instance name
+
+    $app = New-ISApplication
+
+    switch ($pathType)
+    {
+        'Package' { trap { $false; continue } $app.ExistsOnDtsServer($path,$serverName) }
+        'Folder'  { trap { $false; continue } $app.FolderExistsOnDtsServer($path,$serverName) }
+        'Any'     { $p=Test-ISPath $path $serverName 'Package'; $f=Test-ISPath $path $serverName 'Folder'; [bool]$($p -bor $f)}
+        default { throw 'pathType must be Package, Folder, or Any' }
+    }
+
+} #Test-ISPath
+
+#######################
+function Get-ISPackage
+{
+    param([string]$path, [string]$serverName)
+
+    #If serverName contains instance i.e. server\instance, convert to just servername:
+    $serverName = $serverName -replace "\\.*"
+
+    $app = New-ISApplication
+
+    #SQL Server Store
+    if ($path -and $serverName)
+    { 
+        if (Test-ISPath $path $serverName 'Package')
+        { $app.LoadFromDtsServer($path, $serverName, $null) }
+        else
+        { Write-Error "Package $path does not exist on server $serverName" }
+    }
+    #File Store
+    elseif ($path -and !$serverName)
+    { 
+        if (Test-Path -literalPath $path)
+        { $app.LoadPackage($path, $null) }
+        else
+        { Write-Error "Package $path does not exist" }
+    }
+    else
+    { throw 'You must specify a file path or package store path and server name' }
+    
+} #Get-ISPackage
+
+#######################
+function New-Folder
 {
     param($ServerInstance, $ParentFolderPath, $NewFolderName)
 

@@ -2,17 +2,22 @@ $ServerInstance = $deployed.serverInstance
 $PackageFullName = $deployed.packageFullName
 
 try {
-	# Get Sql Version
-	$SqlVersion = Get-SqlVersion -ServerInstance $ServerInstance
+    # Get Sql Version
+    if($deployed.container.type -eq 'overthere.LocalHost'){
+        $SqlVersion = Get-SqlVersion -ServerInstance '(local)'
+    }
+    else{
+        $SqlVersion = Get-SqlVersion -ServerInstance $ServerInstance        
+    }
 
 	# Set Dtutil Path based on Sql Version
-	Set-DtutilPath -SqlVersion $SqlVersion
+	Set-DtsPaths -SqlVersion $SqlVersion
 	
     Write-Host "Removing package [$PackageFullName] on [$ServerInstance]."
-    remove-package  -ServerInstance $ServerInstance -PackageFullName $PackageFullName
+    Remove-Package  -ServerInstance $ServerInstance -PackageFullName $PackageFullName
     
     #Verify Package
-    if(test-packagepath -ServerInstance $ServerInstance -PackageFullName $PackageFullName){
+    if(Test-Packagepath -ServerInstance $ServerInstance -PackageFullName $PackageFullName){
     	Write-Host "Package [$PackageFullName] still exists on [$ServerInstance]."
     	Exit 1
     }
@@ -22,5 +27,5 @@ try {
     }
 }
 catch {
-    write-error "$_ `n $("Failed to remove [$PackageFullName] from [$ServerInstance]")"
+    Write-Error "$_ `n $("Failed to remove [$PackageFullName] from [$ServerInstance]")"
 }
