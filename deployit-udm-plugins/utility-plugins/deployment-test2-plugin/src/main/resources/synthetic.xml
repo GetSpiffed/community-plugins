@@ -17,7 +17,7 @@
         <property name="retryWaitInterval" kind="integer" default="5" description="Time in seconds to wait before next retry"/>
         <property name="showPageInConsole" required="false" kind="boolean" default="false" description="Show the page retrieved from the url"/>
         <property name="headers" kind="set_of_string" required="false" category="Request Headers"/>
-
+        <property name="timeout" kind="integer" default="30" category="Options" description="Timeout in seconds for a query on the specified url"/>
         <!-- admin properties -->
         <property name="classpathResources" kind="set_of_string" hidden="true" required="false" default="tests2/runtime/wget.exe" />
         <property name="createScript" hidden="true" default="tests2/execute-http-request" />

@@ -24,6 +24,7 @@
         <module>deployment-test-plugin</module>
         <module>deployment-test2-plugin</module>
         <module>isolate-host-plugin</module>
+        <module>keystore-plugin</module>
         <module>lock-plugin</module>
         <module>notifications-plugin</module>
         <module>pause-plugin</module>
