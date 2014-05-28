@@ -5,8 +5,13 @@ if($PSVersionTable.PSVersion.major -lt 3) {
 }
 
 #Variables
+#Determine server name (if deployed is empty use container)
+$SqlServer = $deployed.serverName
+if(!$SqlServer){
+    $SqlServer = $deployed.container.serverName
+}
+
 $fullDacPacPath = $deployed.file
-$SqlServer      = $deployed.serverName
 $TargetDatabase = $deployed.targetDatabaseName
 
 $assemblylist = 

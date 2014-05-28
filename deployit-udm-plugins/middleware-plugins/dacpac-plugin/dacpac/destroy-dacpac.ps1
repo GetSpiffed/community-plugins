@@ -1,5 +1,8 @@
-#Variables
-$SqlServer      = $deployed.serverName
+#Determine server name (if deployed is empty use container)
+$SqlServer = $deployed.serverName
+if(!$SqlServer){
+    $SqlServer = $deployed.container.serverName
+}
 $TargetDatabase = $deployed.targetDatabaseName
 
 # Load the required assemblies

@@ -17,7 +17,7 @@
         <property default="47" hidden="true" kind="integer" name="destroyOrder"/>
         <property default="Drop" hidden="true" name="destroyVerb"/>
         <!-- public -->
-        <property name="serverName" required="true"/>
+        <property name="serverName" required="false"/>
         <property name="targetDatabaseName" required="true"/>
         <property name="userName" required="false"/>
         <property name="password" password="true" required="false"/>
