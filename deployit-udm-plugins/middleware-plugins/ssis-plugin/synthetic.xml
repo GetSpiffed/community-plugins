@@ -14,7 +14,7 @@
         <property default="46" hidden="true" kind="integer" name="destroyOrder"/>
         <property default="Delete" hidden="true" name="destroyVerb"/>
         <!-- public -->
-        <property name="serverInstance" required="true"/>
+        <property name="serverName" required="false"/>
         <property name="packageFullName" required="true"/>
         <property name="executePackage" kind="boolean" default="false" required="true" hidden="true"/>
         <property name="sqlServerVersion" kind="string" required="false" label="SQL Server version (short)" description="Short SQL Server version indicator ie. 110, 100, 90"/>
@@ -49,7 +49,7 @@
         <!-- public -->
         <property name="projectName" required="true"/>
         <property name="folderName" required="true"/>
-        <property default="localhost" name="serverName" required="true"/>
+        <property name="serverName" required="false"/>
         <property default="true" kind="boolean" name="catalogShared" required="true"/>
         <property default="SSISDB" name="catalogName" required="false"/>
         <property name="catalogPassword" password="true" required="false"/>

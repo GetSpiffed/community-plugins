@@ -1,8 +1,12 @@
 #Variables
+#Determine server name (if deployed is empty use container)
+$RPTServerName = $deployed.serverName
+if(!$RPTServerName){
+    $RPTServerName = $deployed.container.serverName
+}
 $ProjectFilePath = $deployed.file
 $ProjectName     = $deployed.projectName
 $FolderName      = $deployed.folderName
-$RPTServerName   = $deployed.serverName
 $CatalogName     = $deployed.catalogName
 $CatalogPW       = $deployed.catalogPassword
 

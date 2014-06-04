@@ -1,4 +1,8 @@
-$ServerInstance = $deployed.serverInstance
+#Determine server name (if deployed is empty use container)
+$ServerInstance = $deployed.serverName
+if(!$ServerInstance){
+    $ServerInstance = $deployed.container.serverName
+}
 $PackageFullName = $deployed.packageFullName
 
 try {

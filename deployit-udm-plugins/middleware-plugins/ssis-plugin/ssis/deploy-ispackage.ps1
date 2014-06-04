@@ -1,5 +1,9 @@
+#Determine server name (if deployed is empty use container)
+$ServerInstance = $deployed.serverName
+if(!$ServerInstance){
+    $ServerInstance = $deployed.container.serverName
+}
 $DtsxFullName = $deployed.file
-$ServerInstance = $deployed.serverInstance
 $PackageFullName = $deployed.packageFullName
 
 try {

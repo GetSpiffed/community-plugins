@@ -1,7 +1,11 @@
 #Variables
+#Determine server name (if deployed is empty use container)
+$RPTServerName = $deployed.serverName
+if(!$RPTServerName){
+    $RPTServerName = $deployed.container.serverName
+}
 $ProjectName 		= $deployed.projectName
 $FolderName 		= $deployed.folderName
-$RPTServerName 		= $deployed.serverName
 $CatalogName		= $deployed.catalogName
 
 # Load the IntegrationServices Assembly
