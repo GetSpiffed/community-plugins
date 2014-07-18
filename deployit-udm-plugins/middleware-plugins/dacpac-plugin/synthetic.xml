@@ -5,7 +5,7 @@
     </type-modification>
 
     <type container-type="sql.MsSqlClient" deployable-type="mssql.Dacpac" description="SQL Server dacpac" extends="powershell.ExtensiblePowerShellDeployedArtifact" type="mssql.DeployedDacpac">
-        <generate-deployable description="Dacpac file" extends="powershell.BasePowerShellDeployableFileArtifact" type="mssql.Dacpac"/>
+        <generate-deployable description="Dacpac file" extends="powershell.BasePowerShellDeployableFolderArtifact" type="mssql.Dacpac"/>
         <!-- hidden -->
         <property default="dacpac/deploy-dacpac.ps1" hidden="true" name="createScript"/>
         <property default="53" hidden="true" kind="integer" name="createOrder"/>
@@ -17,18 +17,32 @@
         <property default="47" hidden="true" kind="integer" name="destroyOrder"/>
         <property default="Drop" hidden="true" name="destroyVerb"/>
         <!-- public -->
+        <property name="deployableLocation" required="true"/>
         <property name="serverName" required="false"/>
         <property name="targetDatabaseName" required="true"/>
         <property name="userName" required="false"/>
         <property name="password" password="true" required="false"/>
         <property name="includeCompositeObjects" kind="boolean" required="false" default="true"/>
+		<property name="registerDataTierApplication" kind="boolean" required="false" default="false"/>
+		<property name="blockWhenDriftDetected" kind="boolean" required="false" default="true"/>
         <property name="ignoreFileSize" kind="boolean" required="false" default="false"/>
-        <property name="includeCompositeObjects" kind="boolean" required="false" default="true"/>
         <property name="ignoreFilegroupPlacement" kind="boolean" required="false" default="false"/>
         <property name="ignoreFileAndLogFilePath" kind="boolean" required="false" default="false"/>
         <property name="allowIncompatiblePlatform" kind="boolean" required="false" default="true"/>
+		<property name="BlockOnPossibleDataLoss" kind="boolean" required="false" default="true"/>
+		<property name="GenerateSmartDefaults" kind="boolean" required="false" default="false"/>
         <property name="dacDllPath" required="false" default="C:\Program Files (x86)\Microsoft SQL Server\110\DAC\bin\Microsoft.SqlServer.Dac.dll"/>
+        <property as-containment="true" description="Variables for this package" kind="set_of_ci" name="variables" referenced-type="mssql.DeployedSqlCmdVariable"/>
     </type>
+    <type-modification type="mssql.Dacpac">
+        <property as-containment="true" description="Variables for this package" kind="set_of_ci" name="variables" referenced-type="mssql.SqlCmdVariable"/>
+    </type-modification>
+    <type container-type="mssql.DeployedDacpac" deployable-type="mssql.SqlCmdVariable" description="SqlCmd variables for publish definition" extends="udm.BaseEmbeddedDeployed" type="mssql.DeployedSqlCmdVariable">
+        <generate-deployable description="Definition of sqlcmd variable" extends="udm.BaseEmbeddedDeployable" type="mssql.SqlCmdVariable"/>
+        <property name="variableName" required="true"/>
+        <property name="variablevalue" required="true"/>
+    </type>
+	
 
     <type container-type="sql.MsSqlClient" deployable-type="mssql.SQLPackageWithProfile" description="Deployed DACPAC through SQLpackage" extends="powershell.ExtensiblePowerShellDeployedArtifact" type="mssql.DeployedSQLPackageWithProfile">
         <generate-deployable description="DACPAC through SQLpackage" extends="powershell.BasePowerShellDeployableFolderArtifact" type="mssql.SQLPackageWithProfile"/>

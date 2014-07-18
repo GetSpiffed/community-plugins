@@ -11,7 +11,15 @@ if(!$SqlServer){
     $SqlServer = $deployed.container.serverName
 }
 
-$fullDacPacPath = $deployed.file
+Write-Host $("PSScriptRoot: " + $PSScriptRoot)
+$currentExecutingPath = $PSScriptRoot
+
+#somehow we get ".1" at the end of the $PSScriptRoot path. We need to replace it to get a valid path
+$currentExecutingPath = $currentExecutingPath.Replace(".1", "")
+
+Write-Host $("fullDacPacPath: " +$currentExecutingPath +"\" + $deployed.deployableLocation)
+$fullDacPacPath = $($currentExecutingPath +"\" + $deployed.deployableLocation)
+
 $TargetDatabase = $deployed.targetDatabaseName
 
 $assemblylist = 
@@ -47,11 +55,20 @@ $ErrorActionPreference = "Continue" #To force script to run to completion
 # Load dacpac from file & deploy to database named pubsnew
 $dp = [Microsoft.SqlServer.Dac.DacPackage]::Load($fullDacPacPath)
 $DeployOptions = new-object Microsoft.SqlServer.Dac.DacDeployOptions
-$DeployOptions.IncludeCompositeObjects   = $deployed.includeCompositeObjects
-$DeployOptions.IgnoreFileSize            = $deployed.ignoreFileSize
-$DeployOptions.IgnoreFilegroupPlacement  = $deployed.ignoreFilegroupPlacement
-$DeployOptions.IgnoreFileAndLogFilePath  = $deployed.ignoreFileAndLogFilePath
-$DeployOptions.AllowIncompatiblePlatform = $deployed.allowIncompatiblePlatform
+$DeployOptions.IncludeCompositeObjects     = $deployed.includeCompositeObjects
+$DeployOptions.IgnoreFileSize              = $deployed.ignoreFileSize
+$DeployOptions.IgnoreFilegroupPlacement    = $deployed.ignoreFilegroupPlacement
+$DeployOptions.IgnoreFileAndLogFilePath    = $deployed.ignoreFileAndLogFilePath
+$DeployOptions.AllowIncompatiblePlatform   = $deployed.allowIncompatiblePlatform
+$DeployOptions.RegisterDataTierApplication = $deployed.registerDataTierApplication
+$DeployOptions.BlockWhenDriftDetected      = $deployed.blockWhenDriftDetected
+$DeployOptions.BlockOnPossibleDataLoss     = $deployed.BlockOnPossibleDataLoss
+$DeployOptions.GenerateSmartDefaults       = $deployed.GenerateSmartDefaults 
+
+foreach ($variable in $deployed.variables) {
+	Write-Host "Adding variable: $($variable.variableName)|$($variable.variablevalue)"
+	$DeployOptions.SqlCommandVariableValues.Add($($variable.variableName), $($variable.variablevalue))
+}
 
 $d.Deploy($dp, $TargetDatabase, $true, $DeployOptions) 
 
