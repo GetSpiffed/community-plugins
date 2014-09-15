@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="utf-8"?>
+<synthetic xmlns="http://www.xebialabs.com/deployit/synthetic" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.xebialabs.com/deployit/synthetic synthetic.xsd">
+    <type deployable-type="mssql.ASPackage" container-type="sql.MsSqlClient" extends="powershell.ExtensiblePowerShellDeployedArtifact" description="Published SSAS asdatabase" type="mssql.DeployedASPackage">
+        <generate-deployable type="mssql.ASPackage" extends="powershell.BasePowerShellDeployableFolderArtifact" description="Folder containing the cube definitionand configuration"/>
+        <!-- hidden -->
+		
+		<property name="destroyOptions" default="uploadArtifactData" hidden="true"/>
+        <property name="libraryScripts" default="ssas/runtime/ssas-lib.ps1" hidden="true" kind="list_of_string"/>
+        <property name="createScript" default="ssas/deploy-aspackage.ps1" hidden="true"/>
+        <property name="createOrder" default="54" hidden="true" kind="integer"/>
+        <property name="createVerb" default="Install" hidden="true"/>
+		<property name="modifyScript" default="ssas/deploy-aspackage.ps1" hidden="true"/>
+        <property name="modifyOrder" default="54" hidden="true" kind="integer"/>
+        <property name="modifyVerb" default="Install" hidden="true"/>
+        <property name="destroyScript" default="ssas/destroy-aspackage.ps1" hidden="true"/>
+        <property name="destroyOrder" default="46" hidden="true" kind="integer"/>
+        <property name="destroyVerb" default="Delete" hidden="true"/>
+		
+        <!-- public -->
+        <property name="deployableArtifact" required="true"/>
+        <property name="serverName" required="false" default="localhost" />
+		<property name="ssasDeploymentTool" kind="string" required="true" label="location SSAS deployment tool" default="C:\Program Files (x86)\Microsoft SQL Server\110\Tools\Binn\ManagementStudio\Microsoft.AnalysisServices.Deployment.exe"/>
+		
+    </type>
+</synthetic>
